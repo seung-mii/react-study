@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <div id="root"></div>
+  </body>
+  <script
+    crossorigin
+    src="https://unpkg.com/react@18/umd/react.production.min.js"
+  ></script>
+  <!-- React는 엔진같은 느낌으로, 상호작용하는 UI를 만들 수 있도록 함 -->
+  <script
+    crossorigin
+    src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+  ></script>
+  <!-- React-dom은 리액트 element를 HTML에 두는 역할 -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    // babel은 코드를 변환해주는 녀석, JSX로 적은 코드를 브라우저가 이해할 수 있는 형태로 바꿔주는 것 → 브라우저는 JSX를 모름
+    function MinutesToHours() {
+      const [amount, setAmount] = React.useState(0);
+      const [inverted, setInverted] = React.useState(false);
+      const onChange = (event) => {
+        setAmount(event.target.value);
+        // onChange 함수 내에 setMinutes에 값을 줌으로써 minutes의 데이터가 업데이트 됨
+      };
+
+      const reset = () => setAmount(0);
+      const onInvert = () => {
+        reset();
+        // setInverted(!inverted);  ①
+        setInverted((current) => !current); // ②
+        // state를 바꾸는 2가지 방법 ①②
+        // 둘 다 똑같은 작업을 하고 있는데 ②의 방법이 더 안전함
+        // inverted는 다른 곳에서 update가 될 수 있음 → 즉, inverted가 다른 곳에서 변경되어서
+        // 우리가 예상했던 값이 결과로 나오지 않을 수 있기 때문에 이러한 에러를 최대한 안내게 하기 위해 ②의 방법을 쓰는 것이 좋음
+        // 아래의 방법을 쓰면 React가 이 current가 확실히 현재 값이라는 걸 보장하고 있기 때문 → 우리가 정확히 원하는 값으로 계산 가능
+        // 최최종 ⇒ 현재 state를 바탕으로 다음 state를 계산해내고 싶다면 ②의 방법인 함수를 사용해야 됨
+
+        // Invert할 때마다 변환된 값이 바뀌는 이상한 문제가 있어서 reset을 Invert 함수 안에 넣음
+      };
+
+      return (
+        <div>
+          <div>
+            <label htmlFor="minutes">Minutes</label>
+            <input
+              value={inverted ? amount * 60 : amount}
+              // react는 value 값을 직접적으로 가져올 수 없기 때문에 input의 value를 state(여기선 inverted)로 줌 → 이렇게 하면 input의 value 수정 가능
+              id="minutes"
+              placeholder="minutes"
+              type="number"
+              onChange={onChange}
+              disabled={inverted}
+              // {inverted ? amount * 60 : amoun} 와 {inverted} 부분은 둘 다 JSX 문법
+            />
+          </div>
+          <div>
+            <label htmlFor="hours">Hours</label>
+            <input
+              value={inverted ? amount : Math.round(amount / 60)}
+              id="hours"
+              placeholder="hours"
+              type="number"
+              onChange={onChange}
+              disabled={!inverted}
+              // hours의 value 부분 해석 : 만약 inverted 상태라면(hours이 입력 가능한 상태) state에 있는 값을 그대로 보여주고, 그게 아니라면(hours이 입력 불가능한 상태) 변환된 값을 보여줌
+            />
+          </div>
+          <button onClick={reset}>Reset</button>
+          <button onClick={onInvert}>Invert</button>
+        </div>
+      );
+    }
+    // ★★★★ ⇒ event를 들어주는 것 : onChange, event 발생 시에 값을 업데이트 해주는 것 : setMinutes(), UI에 업데이트된 값을 보여주는 것 : value={minutes}
+
+    function KmToMiles() {
+      const [amount, setAmount] = React.useState(0);
+      const [inverted, setInverted] = React.useState(false);
+
+      const onChange = (event) => {
+        setAmount(event.target.value);
+      };
+      const reset = () => setAmount(0);
+      const invert = () => {
+        reset();
+        setInverted((current) => !current);
+      };
+
+      return (
+        <div>
+          <div class="div">
+            <label htmlFor="km">Km</label>
+            <input
+              id="km"
+              value={!inverted ? amount : amount / 1.609}
+              type="number"
+              placeholder="km"
+              disabled={inverted}
+              onChange={onChange}
+            />
+          </div>
+          <div>
+            <label htmlFor="miles">Miles</label>
+            <input
+              id="miles"
+              value={!inverted ? amount * 1.609 : amount}
+              type="number"
+              placeholder="miles"
+              disabled={!inverted}
+              onChange={onChange}
+            />
+          </div>
+          <button onClick={reset}>Reset</button>
+          <button onClick={invert}>Invert</button>
+        </div>
+      );
+    }
+
+    function App() {
+      const data = React.useState(0);
+      console.log(data); // [0, f] : 첫 번째 값은 초기값, 두 번째 값은 data에 적용할 함수
+      const x = [1, 2, 3];
+      const [a, b, c] = x; // → a = 1, b = 2, c = 3
+
+      const [counter, modifier] = React.useState(0);
+      // 첫 번째 요소는 우리가 담으려는 data 값이고, 두 번째 요소는 이 data 값을 바꿀 때 사용할 modifier
+      // modifier()의 () 안에 counter가 변하기를 원하는 값을 넣음
+      // modifier 함수를 가지고 counter를 변경할 때 컴포넌트가 재생성됨 → 즉, 자동으로 리렌더링 됨
+      // ★★★★★ 제일 중요 : state를 변화시키면 컴포넌트가 리렌더링된다!!!
+
+      const [index, setIndex] = React.useState("xx");
+      const onSelect = (event) => {
+        setIndex(event.target.value);
+      };
+
+      return (
+        <div>
+          <h1>Super Converter</h1>
+          <select onChange={onSelect}>
+            <option value="xx">Select your units</option>
+            <option value="0">Minutes & Hours</option>
+            <option value="1">Km & Miles</option>
+          </select>
+          <hr />
+          {index === "xx" ? "Please select your units" : null}
+          {index === "0" ? <MinutesToHours /> : null}
+          {index === "1" ? <KmToMiles /> : null}
+        </div>
+      );
+    }
+    const root = document.getElementById("root");
+    ReactDOM.createRoot(root).render(<App />);
+    // render : React element를 가지고 HTML로 만들어 배치 → 즉 사용자에게 보여준다는 의미
+    // ReactDOM.createRoot()에는 function이 가야할 위치, render()에는 function
+    // JSX는 JS의 확장된 문법, html과 매우 유사하게 생김
+    // {} 변수나 함수명을 넣는 것, <Title /> 이것도 JSX 문법임
+    // ★★★★ 소문자로 적으면 html 태그로 인식할 수 있으므로 대문자!!
+  </script>
+</html>
