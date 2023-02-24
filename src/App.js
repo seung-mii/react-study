@@ -1,82 +1,69 @@
-import { useState, useEffect } from "react";
-
-function Hello() {
-  useEffect(function () { // 함수
-    console.log("hi :)");
-    return function () {
-      console.log("bye :(");
-    };
-  }, []);
-
-  useEffect(() => { // 화살표 함수
-    console.log("hi :)");
-    return () => console.log("bye :("); // Cleanup function
-    // component가 없어질 때도 function을 실행하고 싶으면 사용, 내부 코드가 return한 내용을 실행
-    // 거의 사용 안하나 필요할 때가 잇음
-  }, []);
-
-  return <h1>Hello</h1>;
-}
+import { useState } from "react";
 
 function App() {
-  const [counter, setValue] = useState(0);
-  const [keyword, setKeyword] = useState("");
-  const onClick = () => setValue((prev) => prev + 1);
-  const onChange = (event) => setKeyword(event.target.value);
-
-  // useEffect의 첫 번째 인자는 우리가 실행하고 싶은 코드, 두 번째 인자는 React가 지켜보는 변수 배열(dependency), 변수의 값이 바뀌면 첫 번째 인자로 넣은 코드를 실행
-  // 하지만 예를 들어 API를 통해 데이터를 가져오는 경우에는 리렌더링될 때마다 데이터를 가져오는 게 필요하지 않으므로 이런 경우 처음 한 번만 렌더링되고 다시는 실행되지 않도록 해야함 
-
-  useEffect(() => {
-    console.log("I run only once.");
-  }, []);
-  // 처음 한 번만 렌더링되고 다시는 실행되지 않음
-
-  // counter가 변화할 때(버튼을 누를 때) 버튼과 관련없는 영화를 검색하고 있음
-  // button을 누를 때가 아닌 movie state가 변화할 때만 user가 원하는 영화를 검색하고 싶음
-  // -> 코드의 특정한 부분이 변화할 때 원하는 코드를 실행할 수 있는 방법
-  useEffect(() => {
-    // keyword에 아무것도 없을 때 렌더링이 되므로 조건 추가
-    if (keyword !== "" && keyword.length > 3) {
-      console.log("SEARCH FOR", keyword);      
+  const [toDo, setToDo] = useState("");
+  const [toDos, setToDos] = useState([]);
+  const onChange = (event) => setToDo(event.target.value);
+  const onSubmit = (event) => {
+    event.preventDefault();
+    // form이 input을 자동으로 submit 시키므로 button을 눌렀을 때 submit 되게 하기 위해 기본 동작을 막음
+    if (toDo === "") { // toDo 가 비워져있으면
+      return; // 함수가 작동되지 않도록 설정
     }
-    console.log("I run when 'keyword' changes.");
-  }, [keyword]);
-  // keyword가 변할 때 내부 코드 실행
 
-  useEffect(() => {
-    console.log("I run when 'counter' changes.");
-  }, [counter]);
+    // 값을 수정하는 두 가지 방법 ①②
+    // ① 함수를 넣어 수정하는 방법
+    setToDos((currentArray) => [toDo, ...currentArray]); 
+    // ★★★★★ 우리는 절대 State를 직접적으로 수정할 수 없음
+    // 대신 함수를 사용하여 함수가 toDo를 수정하는 역할을 수행
+    // 함수를 사용할 때 React는 함수의 첫 번째 인자로 현재 state를 보냄
+    // 여기서 currentArray = 현재 toDos임 
 
-  useEffect(() => {
-    console.log("I run when keyword or counter change");
-  }, [keyword, counter]);
-  // 둘 중 하나라도 변하면 내부 코드 실행
+    // ...(스프레드 연산자) : array를 직접적으로 수정하지 않으면서 setToDos로 array에 element를 추가하는 방법
+    // const food = [1, 2, 3, 4]
+    // console.log([6, food]) → (2) [6, Array(4)]
+    // console.log([6, ...food]) → (5) [6, 1, 2, 3, 4]
+    
+    // ② 직접 수정하는 방법
+    setToDo(""); // input 비우기
+  };
 
-  const [showing, setShowing] = useState(false);
-  const onClick2 = () => setShowing((prev) => !prev);
+  console.log(toDos);
+  console.log(toDos.map((item, index) => <li key={index}>{item}</li>));
 
   return (
     <div>
-      <div>
+      <h1>My To Dos ({toDos.length})</h1>
+      <form onSubmit={onSubmit}>
         <input
-          value={keyword}
           onChange={onChange}
+          value={toDo}
           type="text"
-          placeholder="Search here..."
+          placeholder="Write your to do..."
         />
-        <h1>{counter}</h1>
-        <button onClick={onClick}>click me</button>
-      </div>
-      <div>
-        {showing ? <Hello /> : null}
-        <button onClick={onClick2}>{showing ? "Hide" : "Show"}</button>
-      </div>
+        <button>Add To Do</button>
+      </form>
+      <hr />
+      <ul>
+        {toDos.map((item, index) => (
+          // map은 array를 가질 때 array 각각의 element들을 다 바꾸어 새로운 array를 가지고 싶을 때 사용 
+          // map의 ()안에는 함수를 넣는데 이 함수는 array의 모든 item에 대하여 실행됨
+          // 그 후 무엇을 return 하든지 그 return한 값이 새로운 array에 들어감
+          
+          // ["a", "b", "c", "d", "e", "f"].map(() => ":)") → (6) [":)", ":)", ":)", ":)", ":)", ":)"]
+          // map은 배열의 길이만큼 () 내에 작성한 함수가 실행됨
+          // ["a", "b", "c", "d", "e", "f"].map((item) => item.toUpperCase()) → (6) ["A", "B", "C", "D", "E", "F"]
+          // map() 내 함수의 첫 번째 인자가 진행되고 있는 순서에 맞는 item임
+          
+          // 여기서 함수의 첫 번째 인자인 item은 각 todo를 의미함
+          // 같은 component의 list를 render할 때 key라는 prop을 넣어주라는 warning이 떠서 함수의 두 번째 인자로 오는 index를 사용 
+
+          <li key={index}>{item}</li>
+          // array를 가져와서 array의 element를 변형해서 li로 보여줌 
+        ))}
+      </ul>
     </div>
   );
-  // state를 변경할 때마다 리렌더링되므로 모든 코드가 다시 실행됨 
 }
+
 export default App;
-
-
-
