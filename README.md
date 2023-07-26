@@ -4,6 +4,9 @@
 
 <br/>
 
-### 사용 Hooks
+### 공부한 Hooks
 - useState
 - useEffect
+
+### 공부한 Library
+- Redux
