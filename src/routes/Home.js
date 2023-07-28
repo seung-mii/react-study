@@ -39,7 +39,7 @@ function mapStateToProps(state) { // 여기서 인자로 넣은 state는 store�
 
 function mapDispatchToProps(dispatch) {
   return {
-    addToDo: text => dispatch(actionCreators.addToDo(text))
+    addToDo: text => dispatch(actionCreators.addToDo(text)) // toolkit 쓰면 여기서 추가된 text는 payload로 들어감
     // return한 객체로 addToDo를 만듦으로써 또 Home component의 props에 addToDo라는 객체가 추가됨
     // 그리고 그 addToDo는 인자로 받은 text에 대하여 dispatch 함수의 reducer를 통해 store의 state를 수정함
   };
