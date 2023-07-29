@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { actionCreators } from "../store";
+import { remove } from "../store";
 
 function ToDo({ text, onBtnClick }) {
   return (
@@ -12,7 +12,7 @@ function ToDo({ text, onBtnClick }) {
 
 function mapDispatchToProps(dispatch, ownProps) {
   return {
-    onBtnClick: () => dispatch(actionCreators.deleteToDo(ownProps.id)) // toolkit 쓰면 여기서 사용한 ownProps.id는 payload로 들어감
+    onBtnClick: () => dispatch(remove(ownProps.id)) // toolkit 쓰면 여기서 사용한 ownProps.id는 payload로 들어감
     // 원래 store에 저장되어 있던 state를 삭제해야 하므로 ownProps를 활용
   };
 }
